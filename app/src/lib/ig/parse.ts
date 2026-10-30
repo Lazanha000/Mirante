@@ -58,7 +58,7 @@ export function parseProfileInfo(json: unknown): { profile: ParsedProfile; posts
   return { profile, posts };
 }
 
-function tokens(text: string | null, re: RegExp): string | null {
+export function tokens(text: string | null, re: RegExp): string | null {
   if (!text) return null;
   const set = new Set([...text.matchAll(re)].map(m => m[1].toLowerCase()));
   return set.size ? [...set].join(" ") : null;

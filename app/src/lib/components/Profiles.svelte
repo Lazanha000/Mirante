@@ -78,7 +78,7 @@
 </script>
 
 <h2>Perfis</h2>
-<p class="lede">O Mirante acompanha só os perfis desta lista. Até uns 50 a coleta fica tranquila.{#if !canCollect} <b>Neste navegador os perfis novos não são verificados: isso acontece no app do Android.</b>{/if}</p>
+<p class="lede">O Mirante acompanha só os perfis desta lista. Até uns 50 a coleta fica tranquila.{#if !canCollect} <b>Neste navegador os perfis novos só são verificados com a API da Meta (Ajustes) ou no app do Android.</b>{/if}</p>
 
 <div class="drop" class:over role="region" aria-label="Adicionar perfis"
   ondragover={e => { e.preventDefault(); over = true; }} ondragleave={() => (over = false)}

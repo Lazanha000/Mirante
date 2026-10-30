@@ -23,7 +23,7 @@ type Resp = { status: number; data: unknown };
 export interface Trace { at: number; url: string; status: number | string; body: string }
 const traces: Trace[] = [];
 export const getTraces = () => traces.slice(-10);
-function note(url: string, status: number | string, data: unknown) {
+export function note(url: string, status: number | string, data: unknown) {
   const body = typeof data === "string" ? data : data == null ? "" : JSON.stringify(data);
   traces.push({ at: Date.now(), url: url.replace(/^https:\/\//, "").slice(0, 90), status, body: body.replace(/\s+/g, " ").slice(0, 280) });
   if (traces.length > 30) traces.shift();

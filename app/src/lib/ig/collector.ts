@@ -68,6 +68,7 @@ export class Collector {
       } catch (e) {
         if (!(e instanceof IgError)) throw e;
         if (e.kind === "blocked") return this.block(checked, added);
+        if (e.kind === "auth") return { state: "changed", checked, added, message: e.message };  // token da Meta: não adianta insistir
         if (e.kind === "network") return { state: "offline", checked, added, message: "Sem conexão com o Instagram agora. Tento de novo depois." };
         if (e.kind === "notfound") await this.db.patchProfile(p.id, { status: "error", error: e.message, last_checked_at: this.o.now() });
         else {  // formato estranho: pode ser só este perfil; três seguidos = o Instagram mudou

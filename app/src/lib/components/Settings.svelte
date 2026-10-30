@@ -2,6 +2,7 @@
   import { db } from "../db/client";
   import { ui, say, refresh, collector as cs } from "../state.svelte";
   import { collect, canCollect } from "../ig/runtime";
+  import { loadGraph, saveGraph, testGraph } from "../ig/graph";
   import { loadConfig, saveConfig, connect, session, sendMagicLink, syncNow, command, commandResult, workerStatus, client } from "../sync";
   import { ago, plural } from "../format";
 
@@ -15,6 +16,15 @@
   $effect(() => { void ui.tick; db.meta("ig:trace").then(v => { try { trace = v ? JSON.parse(v as string) : []; } catch { trace = []; } }); });
   const traceText = $derived(trace.map(t => `${new Date(t.at).toLocaleTimeString("pt-BR")} ${t.status} ${t.url}\n   ${t.body}`).join("\n"));
   async function copyTrace() { try { await navigator.clipboard.writeText("Mirante " + __APP_VERSION__ + "\n" + traceText); say("Copiado. Cole na conversa."); } catch { say("Não consegui copiar. Tire um print."); } }
+  let graph = $state(loadGraph() ?? { id: "", token: "" });
+  let graphOn = $state(!!loadGraph());
+  async function graphSave() {
+    const c = { id: graph.id.trim(), token: graph.token.trim() };
+    if (!c.id || !c.token) return say("Preencha o ID e o token.");
+    try { const u = await testGraph(c); saveGraph(c); say(`Conectado como @${u}. Reiniciando para começar a coletar.`); setTimeout(() => location.reload(), 1200); }
+    catch (e) { say((e as Error).message); }
+  }
+  function graphOff() { saveGraph(null); say("API da Meta desligada."); setTimeout(() => location.reload(), 800); }
   let interval = $state("180");
   $effect(() => { db.meta("ig:interval_min").then(v => { if (v) interval = v; }); });
   async function setInterval_(v: string) { interval = v; await db.setMeta("ig:interval_min", v); say("Combinado: confiro os perfis a cada " + (Number(v) / 60) + " h."); }
@@ -102,6 +112,17 @@
 </script>
 
 <h2>Ajustes</h2>
+
+<section>
+  <h3>API oficial da Meta</h3>
+  <p class="soft">Funciona neste aparelho sozinho, sem servidor, no celular, no navegador e no computador. Só enxerga perfis <b>Criador ou Empresa</b>, e não traz views nem stories. Precisa de uma conta do Instagram Criador/Empresa ligada a uma Página do Facebook e de um token do Graph API Explorer (vence em cerca de 60 dias). O token fica só neste aparelho.</p>
+  <label class="soft">ID da conta do Instagram <input type="text" inputmode="numeric" bind:value={graph.id} autocomplete="off" /></label>
+  <label class="soft">Token de acesso <input type="password" bind:value={graph.token} autocomplete="off" /></label>
+  <div class="row">
+    <button class="btn primary" onclick={graphSave}>Testar e salvar</button>
+    {#if graphOn}<button class="btn" onclick={graphOff}>Desligar</button>{/if}
+  </div>
+</section>
 
 <section>
   <h3>Coleta neste aparelho</h3>

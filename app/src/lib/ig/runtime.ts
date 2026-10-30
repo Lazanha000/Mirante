@@ -2,9 +2,11 @@
 import { db } from "../db/client";
 import { collector as cs, refresh, ui } from "../state.svelte";
 import { Collector, type Db } from "./collector";
+import { graphNet, loadGraph } from "./graph";
 import { getTraces, isNative, nativeNet } from "./net";
 
-export const canCollect = isNative();
+// Com a API da Meta configurada, qualquer aparelho coleta (inclusive o navegador); sem ela, só o app Android.
+export const canCollect = isNative() || !!loadGraph();
 let lastTry = 0;
 
 export async function collect(force = false) {
@@ -18,7 +20,7 @@ export async function collect(force = false) {
     if ((await db.meta("app:ver")) !== __APP_VERSION__) {
       await db.setMeta("ig:blocked_until", "0"); await db.setMeta("ig:strikes", "0"); await db.setMeta("app:ver", __APP_VERSION__);
     }
-    const c = new Collector(db as unknown as Db, nativeNet, {
+    const c = new Collector(db as unknown as Db, loadGraph() ? graphNet(loadGraph()!) : nativeNet, {
       onProgress: p => { cs.done = p.done; cs.total = p.total; cs.current = p.handle; },
       onChange: soon,
     });

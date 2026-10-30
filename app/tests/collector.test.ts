@@ -3,6 +3,7 @@ import init from "@sqlite.org/sqlite-wasm";
 import { Store, type RawDB } from "../src/lib/db/store";
 import { Collector } from "../src/lib/ig/collector";
 import { classify, type Net } from "../src/lib/ig/net";
+import { parseDiscovery, classifyGraph } from "../src/lib/ig/graph";
 import { IgError } from "../src/lib/ig/errors";
 import { parseProfileInfo, ownerFromHtml, ownerFromOembed } from "../src/lib/ig/parse";
 import { computeOutliers, snapshotDue } from "../src/lib/ig/analytics";
@@ -173,5 +174,35 @@ describe("coletor", () => {
     expect((await make().run(true)).state).toBe("ok");
     await store.setMeta("ig:blocked_until", String(clock.t + 1000));
     expect((await make().run(true)).state).toBe("blocked");
+  });
+});
+
+describe("API da Meta (Business Discovery)", () => {
+  const disc = {
+    business_discovery: {
+      id: "99", username: "Lia.Cozinha", name: "Lia", biography: "bio", profile_picture_url: "https://cdn/av.jpg", followers_count: 5000, follows_count: 10, media_count: 40,
+      media: { data: [
+        { media_type: "IMAGE", media_url: "https://cdn/a.jpg", permalink: "https://www.instagram.com/p/AAA111/", timestamp: "2026-10-29T10:00:00+0000", caption: "Oi #Receita @amiga", like_count: 7, comments_count: 2 },
+        { media_type: "VIDEO", media_product_type: "REELS", media_url: "https://cdn/v.mp4", thumbnail_url: "https://cdn/vt.jpg", permalink: "https://www.instagram.com/reel/BBB222/", timestamp: "2026-10-28T10:00:00+0000", comments_count: 0 },
+        { media_type: "CAROUSEL_ALBUM", media_url: "https://cdn/c.jpg", permalink: "https://www.instagram.com/p/CCC333/", timestamp: "2026-10-27T10:00:00+0000", children: { data: [{ media_type: "IMAGE", media_url: "https://cdn/c1.jpg" }, { media_type: "VIDEO", media_url: "https://cdn/c2.mp4" }] } },
+        { media_type: "IMAGE", permalink: "sem-codigo", timestamp: "2026-10-26T10:00:00+0000" },
+      ] },
+    },
+  };
+  it("lê perfil e posts", () => {
+    const { profile, posts } = parseDiscovery(disc);
+    expect(profile).toMatchObject({ handle: "lia.cozinha", followers: 5000, is_business: true });
+    expect(posts.map(p => [p.id, p.kind])).toEqual([["AAA111", "image"], ["BBB222", "reel"], ["CCC333", "carousel"]]);
+    expect(posts[0]).toMatchObject({ likes: 7, comments: 2, hashtags: "receita", mentions: "amiga", thumb_src: "https://cdn/a.jpg" });
+    expect(posts[1]).toMatchObject({ likes: null, views: null, thumb_src: "https://cdn/vt.jpg" });
+    expect(posts[2].media.map(m => m.kind)).toEqual(["image", "video"]);
+  });
+  it("classifica os erros da Meta", () => {
+    const kind = (status: number, e: object) => { try { classifyGraph(status, { error: e }); return "ok"; } catch (x) { return (x as IgError).kind; } };
+    expect(kind(400, { code: 190, message: "expired" })).toBe("auth");
+    expect(kind(400, { code: 4, message: "limit" })).toBe("blocked");
+    expect(kind(400, { code: 110, message: "Invalid user id" })).toBe("notfound");
+    expect(kind(400, { code: 100, message: "outra coisa" })).toBe("format");
+    expect(() => parseDiscovery({})).toThrowError(/não entendi/);
   });
 });
