@@ -1,0 +1,51 @@
+# Gera o instalador do Mirante para Windows (de graça) e publica na página "Releases".
+# Roda sozinho quando o código do app muda, ou à mão em Actions > "Mirante: Windows" > Run workflow.
+name: "Mirante: Windows"
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "app/**"
+      - ".github/workflows/mirante-desktop.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: mirante-desktop
+  cancel-in-progress: true
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    timeout-minutes: 40
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+
+      - name: Instalar, testar e gerar o instalador
+        working-directory: app
+        run: |
+          npm ci
+          npm test
+          npx tauri build
+
+      - name: Publicar o instalador
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cp app/src-tauri/target/release/bundle/nsis/*-setup.exe Mirante-Windows.exe
+          gh release delete mirante-windows --cleanup-tag --yes || true
+          gh release create mirante-windows Mirante-Windows.exe \
+            --target "$GITHUB_SHA" --prerelease \
+            --title "Mirante para Windows (versão ${{ github.run_number }})" \
+            --notes "Baixe Mirante-Windows.exe e abra para instalar. O Windows pode avisar que o app é de um editor desconhecido: toque em Mais informações e depois em Executar assim mesmo. Neste programa a coleta usa a API oficial da Meta (Ajustes)."

@@ -40,6 +40,14 @@ O app avisa ("O Instagram pediu uma pausa. Volto às 14:40") e para sozinho: 45 
 | Perfil com "Não encontrei esse perfil" | Confira o @nome; use **Tentar de novo** na lista. |
 | Nenhum post chega | **Ajustes → Atualizar agora**; veja a mensagem logo abaixo. |
 
+## API oficial da Meta (opcional, vale para celular, navegador e computador)
+
+Se o Instagram recusar a coleta sem login, ou se você quiser coletar também no site e no programa de computador, ligue a API oficial: **Ajustes → API oficial da Meta**. Ela só enxerga perfis Criador ou Empresa e não traz views nem stories. Passo a passo em `INSTALAR-API-META.md`.
+
+## Programa de computador (Windows)
+
+O GitHub monta o instalador sozinho: em Releases, baixe **Mirante-Windows.exe** (ou rode Actions > "Mirante: Windows"). Para montar na própria máquina é preciso Node, Rust e as ferramentas de C++ do Visual Studio: `npm run desktop` em `app/`. No computador a coleta funciona com a API da Meta (o site do Instagram bloqueia pedidos diretos de páginas web).
+
 ## Para quem for mexer no código
 
 ```bash

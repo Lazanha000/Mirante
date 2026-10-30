@@ -569,3 +569,5 @@ mirante/
 - **Context7:** documentação atual de Svelte, Tauri, Supabase e instaloader na hora de programar.
 - **Playwright** (instalado): testes e capturas.
 - **Refero e Figma:** não conectaram nesta sessão (bloqueio de rede). Se quiser protótipos visuais lá, é preciso reconectá-los.
+
+> **Atualização (30/out, v0.1.3):** cada aparelho coleta sozinho, sem servidor. No Android, direto do Instagram; em qualquer aparelho, pela API oficial da Meta (fonte B, só perfis Criador/Empresa), configurada em Ajustes (`INSTALAR-API-META.md`). Existe um programa de computador (Tauri, `app/src-tauri`). O trabalhador na nuvem e o Supabase seguem no repositório, mas não são necessários.

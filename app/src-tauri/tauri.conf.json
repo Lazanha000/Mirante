@@ -1,0 +1,9 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "Mirante",
+  "version": "0.1.3",
+  "identifier": "app.mirante.desktop",
+  "build": { "frontendDist": "../dist", "devUrl": "http://localhost:5173", "beforeDevCommand": "npm run dev", "beforeBuildCommand": "npm run build" },
+  "app": { "windows": [{ "title": "Mirante", "width": 1200, "height": 800 }], "security": { "csp": null } },
+  "bundle": { "active": true, "targets": ["nsis"], "icon": ["icons/icon.ico", "icons/icon.png"] }
+}
