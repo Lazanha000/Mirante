@@ -39,7 +39,7 @@ Enquanto isso, o app já funciona com **dados de demonstração** (Ajustes → "
 
 O app é um site estático: qualquer hospedagem grátis serve. Exemplo com **Cloudflare Pages**:
 
-1. Primeiro, ponha a pasta `mirante/` num repositório próprio do GitHub (por exemplo, `mirante`). Hoje ela está dentro do repositório da hamburgueria.
+1. O código já está neste repositório (`Lazanha000/Mirate`).
 2. No Cloudflare: **Workers & Pages → Create → Pages → Connect to Git**, escolha o repositório.
 3. Configure:
    - **Root directory:** `app`
@@ -69,8 +69,8 @@ No terminal do servidor:
 curl -fsSL https://get.docker.com | sh
 
 # código
-git clone https://github.com/SEU_USUARIO/mirante.git
-cd mirante/worker
+git clone https://github.com/Lazanha000/Mirate.git
+cd Mirate/worker
 cp .env.exemplo .env
 
 # chave que criptografa a sessão da conta secundária
